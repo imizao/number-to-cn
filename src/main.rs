@@ -1,16 +1,16 @@
 use hashbrown::HashMap;
 
 fn main() {
-    number_to_zhcn(123456);
-    number_to_zhcn(211133456);
-    number_to_zhcn(10013000);
-    number_to_zhcn(1000123000);
-    number_to_zhcn(1007890000);
-    number_to_zhcn(100000000000);
-    number_to_zhcn(100000123100);
+    assert_eq!(number_to_zhcn(123456), "一十二万三千四百五十六".to_string());
+    assert_eq!(number_to_zhcn(211133456), "二亿一千一百一十三万三千四百五十六".to_string());
+    assert_eq!(number_to_zhcn(10013000), "一千零一万三千零".to_string());
+    assert_eq!(number_to_zhcn(1000123000), "一十亿一十二万三千零".to_string());
+    assert_eq!(number_to_zhcn(1007890000), "一十亿七百八十九万".to_string());
+    assert_eq!(number_to_zhcn(100000000000), "一千亿".to_string());
+    assert_eq!(number_to_zhcn(100000123100), "数字不可以大于一千亿！".to_string());
 }
 
-fn number_to_zhcn(number: i64) {
+fn number_to_zhcn(number: i64) -> String {
     let mut map = HashMap::new();
     map.insert("0", "零");
     map.insert("1", "一");
@@ -28,7 +28,7 @@ fn number_to_zhcn(number: i64) {
     ];
     let num: i64 = 100000000000;
     if number > num {
-        return println!("数字不可以大于一千亿！");
+        return "数字不可以大于一千亿！".to_string();
     }
     let mut name = String::from("");
     let str = number.to_string();
@@ -38,7 +38,7 @@ fn number_to_zhcn(number: i64) {
     for i in str_arr.iter() {
         for (key, value) in map.iter() {
             if i == key {
-                let un = if i.to_string() == "0".to_string() && index % 4 != 0 {
+                let un = if i.to_string() == "0".to_string() && index % 4 != 0 || index == 0 {
                     String::from("")
                 } else {
                     unit[index].to_string()
@@ -56,4 +56,5 @@ fn number_to_zhcn(number: i64) {
     name = name.replace("亿零", "亿");
     name = name.replace("亿万", "亿");
     println!("{name}");
+    return name;
 }
