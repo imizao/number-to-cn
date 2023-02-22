@@ -2,12 +2,12 @@ use hashbrown::HashMap;
 
 fn main() {
     assert_eq!(number_to_zhcn(123456), "一十二万三千四百五十六".to_string());
-    assert_eq!(number_to_zhcn(211133456),"二亿一千一百一十三万三千四百五十六".to_string());
+    assert_eq!(number_to_zhcn(211133456), "二亿一千一百一十三万三千四百五十六".to_string());
     assert_eq!(number_to_zhcn(10013000), "一千零一万三千".to_string());
-    assert_eq!(number_to_zhcn(1000123000),"一十亿零一十二万三千".to_string());
-    assert_eq!(number_to_zhcn(1007890000),"一十亿零七百八十九万".to_string());
+    assert_eq!(number_to_zhcn(1000123000), "一十亿零一十二万三千".to_string());
+    assert_eq!(number_to_zhcn(1007890000), "一十亿零七百八十九万".to_string());
     assert_eq!(number_to_zhcn(100000000000), "一千亿".to_string());
-    assert_eq!(number_to_zhcn(100000123100),"数字不可以大于一千亿！".to_string());
+    assert_eq!(number_to_zhcn(100000123100), "数字不可以大于一千亿！".to_string());
 }
 
 fn number_to_zhcn(number: i64) -> String {
@@ -24,7 +24,7 @@ fn number_to_zhcn(number: i64) -> String {
     map.insert("9", "九");
 
     let unit = vec![
-        " ", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
+        " ", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"
     ];
     let num: i64 = 100000000000;
     if number > num {
