@@ -7,6 +7,7 @@ number_to_zhcn(10013000); // 一千零一万三千
 number_to_zhcn(1000123000); // 一十亿零一十二万三千
 number_to_zhcn(1007890000); // 一十亿零七百八十九万
 number_to_zhcn(100000000000); // 一千亿
+number_to_zhcn(100000123100); // 数字不可以大于一千亿！
 ```
 
 ### Clone
