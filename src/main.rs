@@ -3,14 +3,23 @@ use regex::Regex;
 
 fn main() {
     assert_eq!(number_to_zhcn(123456), "十二万三千四百五十六");
-    assert_eq!(number_to_zhcn(211133456), "两亿一千一百一十三万三千四百五十六");
-    assert_eq!(number_to_zhcn(10013000), "一千零一万三千");
-    assert_eq!(number_to_zhcn(102013000), "一亿零二百零一万三千");
-    assert_eq!(number_to_zhcn(1000123000), "十亿零一十二万三千");
-    assert_eq!(number_to_zhcn(1007890000), "十亿零七百八十九万");
-    assert_eq!(number_to_zhcn(1000000000001), "数字不可以大于一千亿！");
-    assert_eq!(number_to_zhcn(100000000000), "一千亿");
 }
+
+///
+/// ### 小于一千亿的数字转中文文字并输出
+/// 
+/// # Example
+/// ```
+/// assert_eq!(number_to_zhcn(211133456), "两亿一千一百一十三万三千四百五十六");
+/// assert_eq!(number_to_zhcn(10013000), "一千零一万三千");
+/// assert_eq!(number_to_zhcn(102013000), "一亿零二百零一万三千");
+/// assert_eq!(number_to_zhcn(1000123000), "十亿零一十二万三千");
+/// assert_eq!(number_to_zhcn(1007890000), "十亿零七百八十九万");
+/// assert_eq!(number_to_zhcn(1000000000001), "数字不可以大于一千亿！");
+/// assert_eq!(number_to_zhcn(100000000000), "一千亿");
+/// 
+/// ```
+
 
 fn number_to_zhcn(number: i64) -> String {
     let mut map = HashMap::with_capacity(10);
@@ -33,7 +42,7 @@ fn number_to_zhcn(number: i64) -> String {
         println!("数字不可以大于一千亿！");
         return "数字不可以大于一千亿！".to_string();
     }
-
+    // 字符串切割并翻转
     let str = number.to_string();
     let mut str_arr: Vec<&str> = str.split("").collect();
     str_arr.reverse();
@@ -43,12 +52,13 @@ fn number_to_zhcn(number: i64) -> String {
     let re = Regex::new(r"零{2,}").unwrap();
 
     for i in str_arr.iter().filter(|i| !i.is_empty()) {
-        
+        // 取 `i` 的值，如果没有 默认为 `""`
         let value = map.get(i).unwrap_or(&"");
         let un = match value {
             &"零" if index % 4 != 0 || index < 4 => "",
             _ => unit[index],
         };
+        // `一十` -> `十`; `二` -> `两`
         let new_str = match value {
             &"零" if index < 4 => String::new(),
             &"一" if index == str.len() - 1 && un == "十" => format!("{}", un),
