@@ -34,37 +34,28 @@ fn number_to_zhcn(number: i64) -> String {
         println!("数字不可以大于一千亿！");
         return "数字不可以大于一千亿！".to_string();
     }
-    let mut name = String::new();
+
     let str = number.to_string();
     let mut str_arr: Vec<&str> = str.split("").collect();
     str_arr.reverse();
+
+    let mut name = String::new();
     let mut index = 0;
     let re = Regex::new(r"零{2,}").unwrap();
+    
     for i in str_arr.iter() {
         if !i.is_empty() {
-            // let value = match i {
-            //     &"0" => {
-            //         if index % 4 == 0 {
-            //             // 如果是万、亿等级，不加零
-            //             String::new()
-            //         } else if index > 0 && index % 4 != 0 && str_arr[index - 1] != "0" {
-            //             // 如果是十位，且前一位不是 0，不加零
-            //             String::new()
-            //         } else {
-            //             // 其它情况都加零
-            //             map.get(i).unwrap_or(&"").to_string()
-            //         }
-            //     }
-            //     _ => map.get(i).unwrap_or(&"").to_string(),
-            // };
-            let value = map.get(i).unwrap_or(&"").to_string();
-            let un = if value.contains("零") && index < 4 {
-                String::new()
-            } else if value.contains("零") && index % 4 != 0 {
-                String::new()
-            } else {
-                unit[index].to_string()
-            };
+            let value = map.get(i).unwrap_or(&"");
+            let un = match value {
+                &"零" => {
+                    if  index % 4 != 0 || index < 4 {
+                        String::new()
+                    } else {
+                        unit[index].to_string()
+                    }
+                },
+                _ => unit[index].to_string(),
+            }; 
             let new_str = if value.contains("零") && index < 4 {
                 String::new()
             } else {
