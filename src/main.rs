@@ -3,6 +3,7 @@ use regex::Regex;
 
 fn main() {
     assert_eq!(number_to_zhcn(123456), "十二万三千四百五十六");
+    assert_eq!(number_to_zhcn(100010001), "一亿零一万零一");
 }
 
 ///
@@ -14,7 +15,7 @@ fn main() {
 /// assert_eq!(number_to_zhcn(10013000), "一千零一万三千");
 /// assert_eq!(number_to_zhcn(102013000), "一亿零二百零一万三千");
 /// assert_eq!(number_to_zhcn(1000123000), "十亿零一十二万三千");
-/// assert_eq!(number_to_zhcn(1007890000), "十亿零七百八十九万");
+/// assert_eq!(number_to_zhcn(100010001), "一亿零一万零一");
 /// assert_eq!(number_to_zhcn(1000000000001), "数字不可以大于一千亿！");
 /// assert_eq!(number_to_zhcn(100000000000), "一千亿");
 /// 
@@ -60,7 +61,7 @@ fn number_to_zhcn(number: i64) -> String {
         };
         // `一十` -> `十`; `二` -> `两`
         let new_str = match value {
-            &"零" if index < 4 => String::new(),
+            &"零" if index < 4 && name.len() < 1 => String::new(),
             &"一" if index == str.len() - 1 && un == "十" => format!("{}", un),
             &"二" if index == str.len() - 1 => format!("{}{}", "两", un),
             _ => format!("{}{}", value, un),
