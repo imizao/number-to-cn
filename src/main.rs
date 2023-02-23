@@ -42,28 +42,23 @@ fn number_to_zhcn(number: i64) -> String {
     let mut name = String::new();
     let mut index = 0;
     let re = Regex::new(r"零{2,}").unwrap();
-    
+
     for i in str_arr.iter() {
-        if !i.is_empty() {
-            let value = map.get(i).unwrap_or(&"");
-            let un = match value {
-                &"零" => {
-                    if  index % 4 != 0 || index < 4 {
-                        String::new()
-                    } else {
-                        unit[index].to_string()
-                    }
-                },
-                _ => unit[index].to_string(),
-            }; 
-            let new_str = if value.contains("零") && index < 4 {
-                String::new()
-            } else {
-                format!("{}{}", value, un).to_string()
-            };
-            name = format!("{}{}", new_str, name);
-            index += 1;
+        if i.is_empty() {
+            continue;
         }
+        let value = map.get(i).unwrap_or(&"");
+        let un = match value {
+            &"零" if index % 4 != 0 || index < 4 => "",
+            _ => unit[index],
+        };
+        let new_str = if value.contains("零") && index < 4 {
+            String::new()
+        } else {
+            format!("{}{}", value, un)
+        };
+        name = format!("{}{}", new_str, name);
+        index += 1;
     }
     name = re.replace_all(&name, "零").to_string();
     name = name.replace("零万", "万");
