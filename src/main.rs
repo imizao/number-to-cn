@@ -50,9 +50,9 @@ fn number_to_zhcn(number: i64) -> String {
             _ => unit[index],
         };
         let new_str = match value {
-            &"零" if  index < 4 => String::new(),
-            &"一" if  index == str.len() -1 && un == "十" => format!("{}", un),
-            &"二" if  index == str.len() -1 => format!("{}{}", "两", un),
+            &"零" if index < 4 => String::new(),
+            &"一" if index == str.len() - 1 && un == "十" => format!("{}", un),
+            &"二" if index == str.len() - 1 => format!("{}{}", "两", un),
             _ => format!("{}{}", value, un),
         };
         name = format!("{}{}", new_str, name);
