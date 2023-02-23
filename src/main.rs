@@ -52,11 +52,11 @@ fn number_to_zhcn(number: i64) -> String {
             &"零" if index % 4 != 0 || index < 4 => "",
             _ => unit[index],
         };
-        let new_str = if value.contains("零") && index < 4 {
-            String::new()
-        } else {
-            format!("{}{}", value, un)
+        let new_str = match value {
+            &"零" if  index < 4 => String::new(),
+            _ => format!("{}{}", value, un),
         };
+   
         name = format!("{}{}", new_str, name);
         index += 1;
     }
