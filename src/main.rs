@@ -3,15 +3,17 @@ use regex::Regex;
 use std::io;
 
 fn main() {
-    let mut input = String::new();
-    println!("Please input your number: ");
+    loop {
+        let mut input = String::new();
+        println!("Please input your number: ");
 
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
 
-    let num: i64 = input.trim().parse().expect("Failed to parse number");
-    number_to_zhcn(num);
+        let num: i64 = input.trim().parse().expect("Failed to parse number");
+        number_to_zhcn(num);
+    }
 }
 
 /// Converts a number to Chinese text and outputs it.
