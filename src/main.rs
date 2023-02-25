@@ -12,7 +12,12 @@ fn main() {
             .expect("Failed to read line");
 
         let num: i64 = input.trim().parse().expect("Failed to parse number");
-        number_to_zhcn(num);
+
+        if num == 0 {
+            println!("零");
+        } else {
+            number_to_zhcn(num);
+        }
     }
 }
 
