@@ -5,14 +5,15 @@ use std::io;
 fn main() {
     loop {
         let mut input = String::new();
-        println!("Please input your number: ");
+        println!("Please input your number: \n");
 
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
 
-        let num: i64 = input.trim().parse().expect("Failed to parse number");
-        number_to_zhcn(num);
+        let number: i64 = input.trim().parse().expect("Failed to parse number");
+        let result = number_to_zhcn(number);
+        println!("Result is: {:?} \n", result);
     }
 }
 
@@ -31,11 +32,9 @@ fn main() {
 fn number_to_zhcn(number: i64) -> String {
     let num: i64 = 100000000000;
     if number > num {
-        println!("数字不可以大于一千亿！");
         return "数字不可以大于一千亿！".to_string();
     }
     if number == 0 {
-        println!("零");
         return "零".to_string();
     }
     let mut map = HashMap::with_capacity(10);
@@ -53,7 +52,6 @@ fn number_to_zhcn(number: i64) -> String {
     let unit = vec![
         "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
     ];
-   
     // Split and reverse the string
     let str = number.to_string();
     let mut str_arr: Vec<&str> = str.split("").collect();
@@ -84,9 +82,8 @@ fn number_to_zhcn(number: i64) -> String {
     name = name.replace("零万", "万")
                 .replace("零亿", "亿")
                 .replace("亿万", "亿");
-            
+
     name = name.trim_start().to_string();
 
-    println!("{name}");
     name
 }
