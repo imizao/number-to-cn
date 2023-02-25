@@ -3,13 +3,10 @@
 ### The number must be less than a billion.
 
 ```
+number_to_zhcn(0); // 零
 number_to_zhcn(123456); // 十二万三千四百五十六
-number_to_zhcn(211133456); // 两亿一千一百一十三万三千四百五十六
-number_to_zhcn(10013000); // 一千零一万三千
-number_to_zhcn(102013000); // 一亿零二百零一万三千
-number_to_zhcn(1000123000); // 十亿零一十二万三千
-number_to_zhcn(1007890000); // 十亿零七百八十九万
-number_to_zhcn(100000123100); // 数字不可以大于一千亿！
+number_to_zhcn(100010001); // 一亿零一万零一
+number_to_zhcn(100000000001); // 数字不可以大于一千亿！
 number_to_zhcn(100000000000); // 一千亿
 
 ```

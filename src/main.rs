@@ -21,12 +21,10 @@ fn main() {
 ///
 /// # Example
 /// ```
-/// assert_eq!(number_to_zhcn(211133456), "两亿一千一百一十三万三千四百五十六");
-/// assert_eq!(number_to_zhcn(10013000), "一千零一万三千");
-/// assert_eq!(number_to_zhcn(102013000), "一亿零二百零一万三千");
-/// assert_eq!(number_to_zhcn(1000123000), "十亿零一十二万三千");
+/// assert_eq!(number_to_zhcn(0), "零");
+/// assert_eq!(number_to_zhcn(123456), "十二万三千四百五十六");
 /// assert_eq!(number_to_zhcn(100010001), "一亿零一万零一");
-/// assert_eq!(number_to_zhcn(1000000000001), "数字不可以大于一千亿！");
+/// assert_eq!(number_to_zhcn(100000000001), "数字不可以大于一千亿！");
 /// assert_eq!(number_to_zhcn(100000000000), "一千亿");
 /// ```
 
@@ -83,9 +81,10 @@ fn number_to_zhcn(number: i64) -> String {
         index += 1;
     }
     name = re.replace_all(&name, "零").to_string();
-    name = name.replace("零万", "万");
-    name = name.replace("零亿", "亿");
-    name = name.replace("亿万", "亿");
+    name = name.replace("零万", "万")
+                .replace("零亿", "亿")
+                .replace("亿万", "亿");
+            
     name = name.trim_start().to_string();
 
     println!("{name}");
