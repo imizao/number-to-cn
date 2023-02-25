@@ -1,14 +1,22 @@
 use hashbrown::HashMap;
 use regex::Regex;
+use std::io;
 
 fn main() {
-    assert_eq!(number_to_zhcn(123456), "十二万三千四百五十六");
-    assert_eq!(number_to_zhcn(100010001), "一亿零一万零一");
+    let mut input = String::new();
+    println!("Please input your number: ");
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    let num: i64 = input.trim().parse().expect("Failed to parse number");
+    number_to_zhcn(num);
 }
 
+/// Converts a number to Chinese text and outputs it.
+/// The number must be less than a billion.
 ///
-/// ### 小于一千亿的数字转中文文字并输出
-/// 
 /// # Example
 /// ```
 /// assert_eq!(number_to_zhcn(211133456), "两亿一千一百一十三万三千四百五十六");
@@ -18,9 +26,7 @@ fn main() {
 /// assert_eq!(number_to_zhcn(100010001), "一亿零一万零一");
 /// assert_eq!(number_to_zhcn(1000000000001), "数字不可以大于一千亿！");
 /// assert_eq!(number_to_zhcn(100000000000), "一千亿");
-/// 
 /// ```
-
 
 fn number_to_zhcn(number: i64) -> String {
     let mut map = HashMap::with_capacity(10);
@@ -36,14 +42,14 @@ fn number_to_zhcn(number: i64) -> String {
     map.insert("9", "九");
 
     let unit = vec![
-        "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"
+        "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
     ];
     let num: i64 = 100000000000;
     if number > num {
         println!("数字不可以大于一千亿！");
         return "数字不可以大于一千亿！".to_string();
     }
-    // 字符串切割并翻转
+    // Split and reverse the string
     let str = number.to_string();
     let mut str_arr: Vec<&str> = str.split("").collect();
     str_arr.reverse();
@@ -53,7 +59,7 @@ fn number_to_zhcn(number: i64) -> String {
     let re = Regex::new(r"零{2,}").unwrap();
 
     for i in str_arr.iter().filter(|i| !i.is_empty()) {
-        // 取 `i` 的值，如果没有 默认为 `""`
+        // Get the value of `i`, if there is none, default to `""`
         let value = map.get(i).unwrap_or(&"");
         let un = match value {
             &"零" if index % 4 != 0 || index < 4 => "",
@@ -74,7 +80,7 @@ fn number_to_zhcn(number: i64) -> String {
     name = name.replace("零亿", "亿");
     name = name.replace("亿万", "亿");
     name = name.trim_start().to_string();
-    
+
     println!("{name}");
     name
 }
