@@ -12,12 +12,7 @@ fn main() {
             .expect("Failed to read line");
 
         let num: i64 = input.trim().parse().expect("Failed to parse number");
-
-        if num == 0 {
-            println!("零");
-        } else {
-            number_to_zhcn(num);
-        }
+        number_to_zhcn(num);
     }
 }
 
@@ -36,6 +31,15 @@ fn main() {
 /// ```
 
 fn number_to_zhcn(number: i64) -> String {
+    let num: i64 = 100000000000;
+    if number > num {
+        println!("数字不可以大于一千亿！");
+        return "数字不可以大于一千亿！".to_string();
+    }
+    if number == 0 {
+        println!("零");
+        return "零".to_string();
+    }
     let mut map = HashMap::with_capacity(10);
     map.insert("0", "零");
     map.insert("1", "一");
@@ -51,11 +55,7 @@ fn number_to_zhcn(number: i64) -> String {
     let unit = vec![
         "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
     ];
-    let num: i64 = 100000000000;
-    if number > num {
-        println!("数字不可以大于一千亿！");
-        return "数字不可以大于一千亿！".to_string();
-    }
+   
     // Split and reverse the string
     let str = number.to_string();
     let mut str_arr: Vec<&str> = str.split("").collect();
