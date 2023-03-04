@@ -52,7 +52,6 @@ fn number_to_zhcn(number: i64) -> String {
     let unit = vec![
         "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
     ];
-    // Split and reverse the string
     let num_to_str = number.to_string();
     let re = Regex::new(r"零{2,}").unwrap();
     let mut index = 1;
