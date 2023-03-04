@@ -53,37 +53,37 @@ fn number_to_zhcn(number: i64) -> String {
         "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
     ];
     // Split and reverse the string
-    let str = number.to_string();
-    let mut str_arr: Vec<&str> = str.split("").collect();
-    str_arr.reverse();
-
-    let mut name = String::new();
-    let mut index = 0;
+    let num_to_str = number.to_string();
     let re = Regex::new(r"零{2,}").unwrap();
-
-    for i in str_arr.iter().filter(|i| !i.is_empty()) {
-        // Get the value of `i`, if there is none, default to `""`
-        let value = map.get(i).unwrap_or(&"");
-        let un = match value {
-            &"零" if index % 4 != 0 || index < 4 => "",
-            _ => unit[index],
-        };
-        // `一十` -> `十`; `二` -> `两`
-        let new_str = match value {
-            &"零" if index < 4 && name.len() < 1 => String::new(),
-            &"一" if index == str.len() - 1 && un == "十" => format!("{}", un),
-            &"二" if index == str.len() - 1 && un != "十" => format!("{}{}", "两", un),
+    let mut index = 1;
+    let mut cn_to_read = String::new();
+    for i in num_to_str.chars() {
+        let value = map.get(i.to_string().as_str()).unwrap_or(&"");
+        let current_index = num_to_str.len() - index;
+        let un = unit[current_index];
+        let new_str = match *value {
+            "零" => {
+                if (current_index) % 4 == 0 {
+                    format!("{}", un)
+                } else if current_index < 4 && cn_to_read.len() < 1 {
+                    String::new()
+                } else {
+                    format!("{}", value)
+                }
+            }
+            "一" if index == 1 && un == "十" => format!("{}", un),
+            "二" if index == 1 && un != "十" && num_to_str.len() > 1 => format!("{}{}", "两", un),
             _ => format!("{}{}", value, un),
         };
-        name = format!("{}{}", new_str, name);
+        cn_to_read = format!("{}{}", cn_to_read, new_str);
         index += 1;
     }
-    name = re.replace_all(&name, "零").to_string();
-    name = name.replace("零万", "万")
-                .replace("零亿", "亿")
-                .replace("亿万", "亿");
 
-    name = name.trim_start().to_string();
+    cn_to_read = re.replace_all(&cn_to_read, "零").to_string();
+    cn_to_read = cn_to_read
+        .replace("零万", "万")
+        .replace("零亿", "亿")
+        .replace("亿万", "亿");
 
-    name
+    cn_to_read
 }
