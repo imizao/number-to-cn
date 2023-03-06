@@ -77,10 +77,16 @@ fn number_to_zhcn(number: i64) -> String {
         let un = UNIT[current_index];
         let new_str = match *value {
             "零" => {
-                if (current_index) % 4 == 0 {
+                if current_index % 4 == 0 {
                     format!("{}", un)
-                } else if current_index < 4 && cn_to_read.len() < 1 {
-                    String::new()
+                } else if current_index < 4 {
+                    match num_to_str[index..num_to_str.len()].parse::<i64>() {
+                        Ok(n) if n == 0 => String::new(),
+                        Err(_) => String::new(),
+                        _ => {
+                            format!("{}", value)
+                        },
+                    }
                 } else {
                     format!("{}", value)
                 }
