@@ -24,3 +24,9 @@ cd number-to-cn
 cargo run
 ```
 `Please input your number:`
+
+### Test
+
+```
+cargo test
+```
