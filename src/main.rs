@@ -17,7 +17,8 @@ lazy_static! {
         map.insert("9", "九");
         map
     };
-    static ref UNIT: Vec<&'static str> = vec!["", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"];
+    static ref UNIT: Vec<&'static str> =
+        vec!["", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"];
     static ref TOO_LARGE: &'static str = "数字不可以大于一千亿！";
     static ref ZERO: &'static str = "零";
     static ref MAX_NUMBER: i64 = 100000000000;
@@ -77,22 +78,23 @@ impl Conversion {
             let un = UNIT[current_index];
             let new_str = match value {
                 "零" => {
-                    if current_index % 4 == 0 {
-                        format!("{}", un)
-                    } else if current_index < 4 {
-                        match num_to_str[index..num_to_str.len()].parse::<i64>() {
-                            Ok(n) if n == 0 => String::new(),
-                            Err(_) => String::new(),
-                            _ => {
-                                format!("{}", value)
+                    match current_index {
+                        i if i % 4 == 0 => format!("{}", un),
+                        i if i < 4 => {
+                            let n = num_to_str[index..num_to_str.len()].parse::<i64>();
+                            match n {
+                                Ok(n) if n == 0 => String::new(),
+                                Err(_) => String::new(),
+                                _ => format!("{}", value),
                             }
-                        }
-                    } else {
-                        format!("{}", value)
+                        },
+                        _ => format!("{}", value),
                     }
                 }
                 "一" if index == 1 && un == "十" => format!("{}", un),
-                "二" if index == 1 && un != "十" && num_to_str.len() > 1 => format!("{}{}", "两", un),
+                "二" if index == 1 && un != "十" && num_to_str.len() > 1 => {
+                    format!("{}{}", "两", un)
+                }
                 _ => format!("{}{}", value, un),
             };
 
@@ -148,6 +150,9 @@ mod tests {
 
     #[test]
     fn test_greater_than_one_hundred_billion() {
-        assert_eq!(Conversion::number_to_zhcn(100000000001), "数字不可以大于一千亿！");
+        assert_eq!(
+            Conversion::number_to_zhcn(100000000001),
+            "数字不可以大于一千亿！"
+        );
     }
 }
