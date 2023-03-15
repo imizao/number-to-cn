@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 use lazy_static::lazy_static;
-use std::{env, io};
+use std::io;
 
 lazy_static! {
     static ref MAP: HashMap<&'static str, &'static str> = {
@@ -25,7 +25,6 @@ lazy_static! {
 }
 
 fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
     loop {
         let mut input = String::new();
         println!("Please input your number: \n");
@@ -93,29 +92,25 @@ impl Conversion {
                         format!("{}", value)
                     }
                 }
-                "一" if index == 1 && un == "十" => {
-                    format!("{}", un)
-                }
+                "一" if index == 1 && un == "十" => format!("{}", un),
                 "二" if index == 1 && un != "十" && num_to_str.len() > 1 => {
                     format!("{}{}", "两", un)
                 }
-                _ => {
-                    format!("{}{}", value, un)
-                }
+                _ => format!("{}{}", value, un),
             };
-            if new_str == "零" && cn_to_vec.ends_with(&[ZERO.to_string()]) {
-            } else if new_str == "万" || new_str == "亿" && cn_to_vec.ends_with(&[ZERO.to_string()])
-            {
-                cn_to_vec.pop();
-                cn_to_vec.push(new_str);
-            } else {
-                cn_to_vec.push(new_str);
-            }
 
+            match (new_str.as_str(), cn_to_vec.ends_with(&[ZERO.to_string()])) {
+                ("零", true) => (),
+                ("万", true) | ("亿", true) => {
+                    cn_to_vec.pop();
+                    cn_to_vec.push(new_str);
+                },
+                _ => cn_to_vec.push(new_str),
+            }
             index += 1;
         }
-        let mut cn_to_read = cn_to_vec.join("");
-        cn_to_read = cn_to_read.replace("亿万", "亿");
+        let cn_to_read = format!("{}", cn_to_vec.join("").replace("亿万", "亿"));
+
         cn_to_read
     }
 }
