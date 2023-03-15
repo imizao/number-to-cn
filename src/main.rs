@@ -17,8 +17,7 @@ lazy_static! {
         map.insert("9", "九");
         map
     };
-    static ref UNIT: Vec<&'static str> =
-        vec!["", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"];
+    static ref UNIT: Vec<&'static str> = vec!["", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"];
     static ref TOO_LARGE: &'static str = "数字不可以大于一千亿！";
     static ref ZERO: &'static str = "零";
     static ref MAX_NUMBER: i64 = 100000000000;
@@ -73,10 +72,10 @@ impl Conversion {
         let mut index = 1;
         let mut cn_to_vec: Vec<String> = vec![];
         for i in num_to_str.chars() {
-            let value = MAP.get(i.to_string().as_str()).unwrap_or(&"");
+            let value = *MAP.get(i.to_string().as_str()).unwrap_or(&"");
             let current_index = num_to_str.len() - index;
             let un = UNIT[current_index];
-            let new_str = match *value {
+            let new_str = match value {
                 "零" => {
                     if current_index % 4 == 0 {
                         format!("{}", un)
@@ -93,9 +92,7 @@ impl Conversion {
                     }
                 }
                 "一" if index == 1 && un == "十" => format!("{}", un),
-                "二" if index == 1 && un != "十" && num_to_str.len() > 1 => {
-                    format!("{}{}", "两", un)
-                }
+                "二" if index == 1 && un != "十" && num_to_str.len() > 1 => format!("{}{}", "两", un),
                 _ => format!("{}{}", value, un),
             };
 
@@ -104,7 +101,7 @@ impl Conversion {
                 ("万", true) | ("亿", true) => {
                     cn_to_vec.pop();
                     cn_to_vec.push(new_str);
-                },
+                }
                 _ => cn_to_vec.push(new_str),
             }
             index += 1;
@@ -125,8 +122,18 @@ mod tests {
     }
 
     #[test]
+    fn test_twenty() {
+        assert_eq!(Conversion::number_to_zhcn(20), "二十");
+    }
+
+    #[test]
     fn test_123456() {
         assert_eq!(Conversion::number_to_zhcn(123456), "十二万三千四百五十六");
+    }
+
+    #[test]
+    fn test_2000001() {
+        assert_eq!(Conversion::number_to_zhcn(2000001), "两百万零一");
     }
 
     #[test]
@@ -141,9 +148,6 @@ mod tests {
 
     #[test]
     fn test_greater_than_one_hundred_billion() {
-        assert_eq!(
-            Conversion::number_to_zhcn(100000000001),
-            "数字不可以大于一千亿！"
-        );
+        assert_eq!(Conversion::number_to_zhcn(100000000001), "数字不可以大于一千亿！");
     }
 }
