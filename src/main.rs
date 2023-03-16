@@ -46,7 +46,7 @@ fn main() {
     }
 }
 
-pub struct Conversion;
+pub(crate) struct Conversion;
 
 impl Conversion {
     /// Converts a number to Chinese text and outputs it.
@@ -60,7 +60,7 @@ impl Conversion {
     /// assert_eq!(number_to_zhcn(100000000001), "数字不可以大于一千亿！");
     /// assert_eq!(number_to_zhcn(100000000000), "一千亿");
     /// ```
-
+    
     pub fn number_to_zhcn(number: i64) -> String {
         if number > *MAX_NUMBER {
             return TOO_LARGE.to_string();
@@ -69,10 +69,10 @@ impl Conversion {
             return ZERO.to_string();
         }
 
-        let num_to_str = number.to_string();
+        let num_to_str: Vec<char> = number.to_string().chars().collect();
         let mut index = 1;
         let mut cn_to_vec: Vec<String> = vec![];
-        for i in num_to_str.chars() {
+        for i in num_to_str.iter() {
             let value = *MAP.get(i.to_string().as_str()).unwrap_or(&"");
             let current_index = num_to_str.len() - index;
             let un = UNIT[current_index];
@@ -81,7 +81,7 @@ impl Conversion {
                     match current_index {
                         i if i % 4 == 0 => format!("{}", un),
                         i if i < 4 => {
-                            let n = num_to_str[index..num_to_str.len()].parse::<i64>();
+                            let n = num_to_str[index..num_to_str.len()].iter().collect::<String>().parse::<i64>();
                             match n {
                                 Ok(n) if n == 0 => String::new(),
                                 Err(_) => String::new(),
@@ -119,40 +119,13 @@ mod tests {
     use crate::Conversion;
 
     #[test]
-    fn test_zero() {
+    fn test_number_to_zhcn() {
         assert_eq!(Conversion::number_to_zhcn(0), "零");
-    }
-
-    #[test]
-    fn test_twenty() {
         assert_eq!(Conversion::number_to_zhcn(20), "二十");
-    }
-
-    #[test]
-    fn test_123456() {
         assert_eq!(Conversion::number_to_zhcn(123456), "十二万三千四百五十六");
-    }
-
-    #[test]
-    fn test_2000001() {
         assert_eq!(Conversion::number_to_zhcn(2000001), "两百万零一");
-    }
-
-    #[test]
-    fn test_100010001() {
         assert_eq!(Conversion::number_to_zhcn(100010001), "一亿零一万零一");
-    }
-
-    #[test]
-    fn test_one_hundred_billion() {
         assert_eq!(Conversion::number_to_zhcn(100000000000), "一千亿");
-    }
-
-    #[test]
-    fn test_greater_than_one_hundred_billion() {
-        assert_eq!(
-            Conversion::number_to_zhcn(100000000001),
-            "数字不可以大于一千亿！"
-        );
+        assert_eq!(Conversion::number_to_zhcn(100000000001), "数字不可以大于一千亿！");
     }
 }
