@@ -73,7 +73,7 @@ impl Conversion {
         let mut index = 1;
         let mut cn_to_vec: Vec<String> = vec![];
         for i in num_to_str.iter() {
-            let value = *MAP.get(i.to_string().as_str()).unwrap_or(&"");
+            let value = *MAP.get::<str>(&i.to_string()).unwrap_or(&"");
             let current_index = num_to_str.len() - index;
             let un = UNIT[current_index];
             let new_str = match value {
@@ -97,7 +97,7 @@ impl Conversion {
                 }
                 _ => format!("{}{}", value, un),
             };
-
+            
             match (new_str.as_str(), cn_to_vec.ends_with(&[ZERO.to_string()])) {
                 ("零", true) => (),
                 ("万", true) | ("亿", true) => {
