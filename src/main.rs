@@ -70,47 +70,32 @@ impl Conversion {
         }
 
         let num_to_str: Vec<char> = number.to_string().chars().collect();
-        let mut index = 1;
         let mut cn_to_vec: Vec<String> = vec![];
-        for i in num_to_str.iter() {
-            let value = *MAP.get::<str>(&i.to_string()).unwrap_or(&"");
-            let current_index = num_to_str.len() - index;
-            let un = UNIT[current_index];
-            let new_str = match value {
-                "零" => {
-                    match current_index {
-                        i if i % 4 == 0 => format!("{}", un),
-                        i if i < 4 => {
-                            let n = num_to_str[index..num_to_str.len()].iter().collect::<String>().parse::<i64>();
-                            match n {
-                                Ok(n) if n == 0 => String::new(),
-                                Err(_) => String::new(),
-                                _ => format!("{}", value),
-                            }
-                        },
-                        _ => format!("{}", value),
-                    }
-                }
-                "一" if index == 1 && un == "十" => format!("{}", un),
-                "二" if index == 1 && un != "十" && num_to_str.len() > 1 => {
-                    format!("{}{}", "两", un)
-                }
-                _ => format!("{}{}", value, un),
-            };
-            
-            match (new_str.as_str(), cn_to_vec.ends_with(&[ZERO.to_string()])) {
-                ("零", true) => (),
-                ("万", true) | ("亿", true) => {
-                    cn_to_vec.pop();
-                    cn_to_vec.push(new_str);
-                }
-                _ => cn_to_vec.push(new_str),
-            }
-            index += 1;
-        }
-        let cn_to_read = format!("{}", cn_to_vec.join("").replace("亿万", "亿"));
+        for (index, &digit) in num_to_str.iter().enumerate() {
+            let value = *MAP.get::<str>(&digit.to_string()).unwrap_or(&"");
+            let current_index = num_to_str.len() - index - 1;
+            let unit = UNIT[current_index];
 
-        cn_to_read
+            let new_str = match (value, unit, index, num_to_str.len()) {
+                ("零", _, _, _) if current_index % 4 == 0 => unit.to_string(),
+                ("零", _, _, _) => {
+                    let remaining: i64 = num_to_str[index..].iter().collect::<String>().parse().unwrap_or(0);
+                    if remaining == 0 { String::new() } else { value.to_string() }
+                }
+                ("一", "十", 0, _) => unit.to_string(),
+                ("二", _, 0, len) if unit != "十" && len > 1 => format!("两{}", unit),
+                _ => format!("{}{}", value, unit),
+            };
+
+            if new_str != "零" || !cn_to_vec.ends_with(&[ZERO.to_string()]) {
+                if new_str == "万" || new_str == "亿" {
+                    cn_to_vec.pop();
+                }
+                cn_to_vec.push(new_str);
+            }
+        }
+        cn_to_vec.join("").replace("亿万", "亿")
+        
     }
 }
 
