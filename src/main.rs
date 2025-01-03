@@ -60,7 +60,6 @@ impl Conversion {
     /// assert_eq!(number_to_zhcn(100000000001), "数字不可以大于一千亿！");
     /// assert_eq!(number_to_zhcn(100000000000), "一千亿");
     /// ```
-    
     pub fn number_to_zhcn(number: i64) -> String {
         if number > *MAX_NUMBER {
             return TOO_LARGE.to_string();
@@ -71,31 +70,43 @@ impl Conversion {
 
         let num_to_str: Vec<char> = number.to_string().chars().collect();
         let mut cn_to_vec: Vec<String> = vec![];
+        let mut zero_flag = false;
+
         for (index, &digit) in num_to_str.iter().enumerate() {
             let value = *MAP.get::<str>(&digit.to_string()).unwrap_or(&"");
             let current_index = num_to_str.len() - index - 1;
             let unit = UNIT[current_index];
 
-            let new_str = match (value, unit, index, num_to_str.len()) {
-                ("零", _, _, _) if current_index % 4 == 0 => unit.to_string(),
+            match (value, unit, index, num_to_str.len()) {
+                ("零", _, _, _) if current_index % 4 == 0 => {
+                    // 处理“万”或“亿”位上的零
+                    cn_to_vec.push(unit.to_string());
+                }
                 ("零", _, _, _) => {
-                    let remaining: i64 = num_to_str[index..].iter().collect::<String>().parse().unwrap_or(0);
-                    if remaining == 0 { String::new() } else { value.to_string() }
+                    // 处理普通零
+                    zero_flag = true;
                 }
-                ("一", "十", 0, _) => unit.to_string(),
-                ("二", _, 0, len) if unit != "十" && len > 1 => format!("两{}", unit),
-                _ => format!("{}{}", value, unit),
-            };
-
-            if new_str != "零" || !cn_to_vec.ends_with(&[ZERO.to_string()]) {
-                if new_str == "万" || new_str == "亿" {
-                    cn_to_vec.pop();
+                ("一", "十", 0, _) => {
+                    // 处理“一十”的情况
+                    cn_to_vec.push(unit.to_string());
                 }
-                cn_to_vec.push(new_str);
+                ("二", _, 0, len) if unit != "十" && len > 1 => {
+                    // 处理“两”的情况
+                    cn_to_vec.push(format!("两{}", unit));
+                }
+                _ => {
+                    // 处理普通数字
+                    if zero_flag {
+                        cn_to_vec.push(ZERO.to_string());
+                        zero_flag = false;
+                    }
+                    cn_to_vec.push(format!("{}{}", value, unit));
+                }
             }
         }
+
+        // 拼接结果并替换“亿万”为“亿”
         cn_to_vec.join("").replace("亿万", "亿")
-        
     }
 }
 
@@ -108,6 +119,7 @@ mod tests {
         assert_eq!(Conversion::number_to_zhcn(0), "零");
         assert_eq!(Conversion::number_to_zhcn(20), "二十");
         assert_eq!(Conversion::number_to_zhcn(123456), "十二万三千四百五十六");
+        assert_eq!(Conversion::number_to_zhcn(202300), "二十万二千三百");
         assert_eq!(Conversion::number_to_zhcn(2000001), "两百万零一");
         assert_eq!(Conversion::number_to_zhcn(100010001), "一亿零一万零一");
         assert_eq!(Conversion::number_to_zhcn(100000000000), "一千亿");
