@@ -90,9 +90,25 @@ impl Conversion {
                     // 处理“一十”的情况
                     cn_to_vec.push(unit.to_string());
                 }
-                ("二", _, 0, len) if unit != "十" && len > 1 => {
-                    // 处理“两”的情况
-                    cn_to_vec.push(format!("两{}", unit));
+                ("二", _, _, _) => {
+                    // 处理“二”替换为“两”的情况
+                    let replace_two = match (unit, index, num_to_str.len()) {
+                        ("十", _, _) => false, // 十位上的“二”不替换
+                        (_, 0, len) if len > 1 && unit != "十" => true, // 最高位的“二”替换为“两”
+                        ("百", _, _) | ("千", _, _) => true, // 百位和千位的“二”替换为“两”
+                        _ => false, // 其他情况不替换
+                    };
+
+                    if zero_flag {
+                        cn_to_vec.push(ZERO.to_string());
+                        zero_flag = false;
+                    }
+
+                    if replace_two {
+                        cn_to_vec.push(format!("两{}", unit));
+                    } else {
+                        cn_to_vec.push(format!("{}{}", value, unit));
+                    }
                 }
                 _ => {
                     // 处理普通数字
@@ -119,9 +135,10 @@ mod tests {
         assert_eq!(Conversion::number_to_zhcn(0), "零");
         assert_eq!(Conversion::number_to_zhcn(20), "二十");
         assert_eq!(Conversion::number_to_zhcn(123456), "十二万三千四百五十六");
-        assert_eq!(Conversion::number_to_zhcn(202300), "二十万二千三百");
+        assert_eq!(Conversion::number_to_zhcn(202300), "二十万两千三百");
         assert_eq!(Conversion::number_to_zhcn(2000001), "两百万零一");
         assert_eq!(Conversion::number_to_zhcn(100010001), "一亿零一万零一");
+        assert_eq!(Conversion::number_to_zhcn(20202020202), "两百零二亿零两百零二万零两百零二");
         assert_eq!(Conversion::number_to_zhcn(100000000000), "一千亿");
         assert_eq!(Conversion::number_to_zhcn(100000000001), "数字不可以大于一千亿！");
     }
