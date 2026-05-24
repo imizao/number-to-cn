@@ -2,16 +2,17 @@ mod converter;
 mod input_handler;
 
 use converter::Converter;
-use input_handler::InputHandler;
+use input_handler::{InputHandler, InputResult};
 
 fn main() {
     loop {
         match InputHandler::get_number() {
-            Some(number) => {
+            InputResult::Number(number) => {
                 let result = Converter::number_to_zhcn(number);
-                println!("Result is: {:?} \n", result);
+                println!("Result is: {} \n", result);
             }
-            None => continue,
+            InputResult::Invalid => continue,
+            InputResult::Eof => break,
         }
     }
 }

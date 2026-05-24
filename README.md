@@ -1,6 +1,6 @@
 
 ## Converts a number to Chinese text and outputs it.
-### The number must be less than a billion.
+### The absolute value of the number must not be greater than one hundred billion.
 
 ```
 number_to_zhcn(0);     // 零
