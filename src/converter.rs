@@ -1,27 +1,9 @@
-use hashbrown::HashMap;
-use lazy_static::lazy_static;
-
-lazy_static! {
-    static ref MAP: HashMap<&'static str, &'static str> = {
-        let mut map = HashMap::new();
-        map.insert("0", "零");
-        map.insert("1", "一");
-        map.insert("2", "二");
-        map.insert("3", "三");
-        map.insert("4", "四");
-        map.insert("5", "五");
-        map.insert("6", "六");
-        map.insert("7", "七");
-        map.insert("8", "八");
-        map.insert("9", "九");
-        map
-    };
-    static ref UNIT: Vec<&'static str> =
-        vec!["", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千"];
-    static ref TOO_LARGE: &'static str = "数字不可以大于一千亿！";
-    static ref ZERO: &'static str = "零";
-    static ref MAX_NUMBER: i64 = 100000000000;
-}
+const DIGITS: [&str; 10] = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const UNITS: [&str; 12] = [
+    "", "十", "百", "千", "万", "十", "百", "千", "亿", "十", "百", "千",
+];
+const MAX_NUMBER: i64 = 100_000_000_000;
+const TOO_LARGE: &str = "数字不可以大于一千亿！";
 
 pub struct Converter;
 
@@ -40,77 +22,62 @@ impl Converter {
     /// assert_eq!(Converter::number_to_zhcn(-123), "负一百二十三");
     /// ```
     pub fn number_to_zhcn(number: i64) -> String {
-        if number > *MAX_NUMBER || number < -*MAX_NUMBER {
-            return TOO_LARGE.to_string();
+        // Check the range before negating so i64::MIN cannot overflow.
+        if !(-MAX_NUMBER..=MAX_NUMBER).contains(&number) {
+            return TOO_LARGE.to_owned();
         }
         if number == 0 {
-            return ZERO.to_string();
+            return DIGITS[0].to_owned();
         }
 
-        let negative = number < 0;
-        let abs_number = if negative { -number } else { number };
+        let magnitude = number.abs();
+        let mut divisor = 1;
+        let mut position = 0;
+        while magnitude / divisor >= 10 {
+            divisor *= 10;
+            position += 1;
+        }
+        let highest_position = position;
+        let mut result = String::new();
+        if number < 0 {
+            result.push('负');
+        }
+        let mut pending_zero = false;
 
-        let num_to_str: Vec<char> = abs_number.to_string().chars().collect();
-        let mut cn_to_vec: Vec<String> = vec![];
-        let mut zero_flag = false;
-
-        for (index, &digit) in num_to_str.iter().enumerate() {
-            let value = *MAP.get::<str>(&digit.to_string()).unwrap_or(&"");
-            let current_index = num_to_str.len() - index - 1;
-            let unit = UNIT[current_index];
-
-            match (value, unit, index, num_to_str.len()) {
-                ("零", _, _, _) if current_index % 4 == 0 => {
-                    // 处理“万”或“亿”位上的零
-                    cn_to_vec.push(unit.to_string());
+        loop {
+            let digit = (magnitude / divisor % 10) as usize;
+            let unit = UNITS[position];
+            if digit == 0 {
+                if position % 4 != 0 {
+                    pending_zero = true;
+                } else if position > 0 && magnitude / divisor % 10_000 != 0 {
+                    // Emit a group unit only when that four-digit group is nonzero.
+                    // Keep pending_zero across the boundary to preserve existing readings.
+                    result.push_str(unit);
                 }
-                ("零", _, _, _) => {
-                    // 处理普通零
-                    zero_flag = true;
+            } else {
+                if pending_zero {
+                    result.push('零');
+                    pending_zero = false;
                 }
-                ("一", "十", 0, _) => {
-                    // 处理“一十”的情况
-                    cn_to_vec.push(unit.to_string());
+                let omit_one = digit == 1 && unit == "十" && position == highest_position;
+                let use_liang = digit == 2
+                    && (position % 4 == 2
+                        || position % 4 == 3
+                        || (position == highest_position && position > 0 && unit != "十"));
+                if !omit_one {
+                    result.push_str(if use_liang { "两" } else { DIGITS[digit] });
                 }
-                ("二", _, _, _) => {
-                    // 处理“二”替换为“两”的情况
-                    let replace_two = match (unit, index, num_to_str.len()) {
-                        ("十", _, _) => false,                          // 十位上的“二”不替换
-                        (_, 0, len) if len > 1 && unit != "十" => true, // 最高位的“二”替换为“两”
-                        ("百", _, _) | ("千", _, _) => true, // 百位和千位的“二”替换为“两”
-                        _ => false,                          // 其他情况不替换
-                    };
-
-                    if zero_flag {
-                        cn_to_vec.push(ZERO.to_string());
-                        zero_flag = false;
-                    }
-
-                    if replace_two {
-                        cn_to_vec.push(format!("两{}", unit));
-                    } else {
-                        cn_to_vec.push(format!("{}{}", value, unit));
-                    }
-                }
-                _ => {
-                    // 处理普通数字
-                    if zero_flag {
-                        cn_to_vec.push(ZERO.to_string());
-                        zero_flag = false;
-                    }
-                    cn_to_vec.push(format!("{}{}", value, unit));
-                }
+                result.push_str(unit);
             }
-        }
 
-        // 拼接结果并替换“亿万”为“亿”
-        let result = cn_to_vec.join("").replace("亿万", "亿");
-
-        if negative {
-            format!("负{}", result)
-        } else {
-            result
+            if position == 0 {
+                break;
+            }
+            divisor /= 10;
+            position -= 1;
         }
+        result
     }
 }
 
@@ -172,5 +139,52 @@ mod tests {
             Converter::number_to_zhcn(i64::MIN),
             "数字不可以大于一千亿！"
         );
+    }
+
+    #[test]
+    fn preserves_cross_group_readings() {
+        let cases = [
+            (10_001_000, "一千万零一千"),
+            (10_002_000, "一千万零两千"),
+            (100_010_001, "一亿零一万零一"),
+            (100_000_010, "一亿零一十"),
+            (100_020_000, "一亿零二万"),
+            (200_020_002, "两亿零二万零二"),
+            (1_000_000_001, "十亿零一"),
+            (99_999_999, "九千九百九十九万九千九百九十九"),
+            (100_000_001, "一亿零一"),
+            (99_999_999_999, "九百九十九亿九千九百九十九万九千九百九十九"),
+        ];
+        for (number, expected) in cases {
+            assert_eq!(Converter::number_to_zhcn(number), expected, "{number}");
+            assert_eq!(Converter::number_to_zhcn(-number), format!("负{expected}"));
+        }
+    }
+
+    #[test]
+    fn sparse_numbers_have_no_repeated_or_edge_zeros() {
+        // Exercise every zero/nonzero placement up to twelve digits,
+        // including empty groups and zeros on both sides of 万/亿.
+        for mask in 1..4096u32 {
+            for digit in [1, 2, 9] {
+                let mut number = 0i64;
+                let mut place = 1;
+                for bit in 0..12 {
+                    if mask & (1 << bit) != 0 {
+                        number += digit * place;
+                    }
+                    place *= 10;
+                }
+                if number > MAX_NUMBER {
+                    continue;
+                }
+                let text = Converter::number_to_zhcn(number);
+                assert!(!text.contains("零零"), "{number}: {text}");
+                assert!(!text.starts_with('零'), "{number}: {text}");
+                assert!(!text.ends_with('零'), "{number}: {text}");
+                assert!(!text.contains("亿万"), "{number}: {text}");
+                assert_eq!(Converter::number_to_zhcn(-number), format!("负{text}"));
+            }
+        }
     }
 }
